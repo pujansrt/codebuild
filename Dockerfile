@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:14.04.5
 
 RUN apt-get update \
     && apt-get install software-properties-common -y --no-install-recommends\
@@ -7,11 +7,11 @@ RUN apt-get update \
     && apt-get clean
 
 RUN apt-get install -y \
-		build-essential \
-		wget \
-		git \
-		curl \
-		unzip \
+	build-essential \
+	wget \
+	git \
+	curl \
+	unzip \
         python3 \
         python3-pip \
         python3-setuptools \
@@ -22,7 +22,7 @@ RUN apt-get install -y \
 
 RUN pip3 --no-cache-dir install --upgrade awscli
 
-RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash
 
 RUN apt-get install -y nodejs
 
