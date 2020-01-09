@@ -16,6 +16,8 @@ RUN apt-get install -y \
 
 RUN pip3 --no-cache-dir install --upgrade awscli
 
+RUN apt-get build-dep wget
+
 RUN wget -q https://releases.hashicorp.com/terraform/0.12.19/terraform_0.12.19_linux_amd64.zip && unzip terraform_0.12.19_linux_amd64.zip && sudo mv terraform /usr/local/bin/
 
 CMD ["/bin/bash"]
