@@ -22,7 +22,7 @@ RUN apt-get install -y \
 
 RUN pip3 --no-cache-dir install --upgrade awscli
 
-RUN curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
 
 RUN apt-get install -y nodejs
 
