@@ -1,0 +1,10 @@
+#!/bin/sh
+
+ASSUME_ROLE=$1
+
+echo ${ASSUME_ROLE}
+
+#credentials_json=$(aws sts assume-role --role-arn ${ASSUME_ROLE} --role-session-name "RoleSession1")
+#export AWS_ACCESS_KEY_ID=$(echo $credentials_json | jq -r .Credentials.AccessKeyId)
+#export AWS_SECRET_ACCESS_KEY=$(echo $credentials_json | jq -r .Credentials.SecretAccessKey)
+#export AWS_SESSION_TOKEN=$(echo $credentials_json | jq -r .Credentials.SessionToken)
