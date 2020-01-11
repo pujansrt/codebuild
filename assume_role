@@ -1,5 +1,35 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+
+SET=false
+UNSET=false
+
+ORIGINAL_AWS_ACCESS_KEY_ID=""
+ORIGINAL_AWS_SECRET_ACCESS_KEY=""
+
+function help() {
+	me=`basename "$0"`
+	echo -e ""
+	echo -e "Help               : Running this script"
+	echo -e "Usage (1)          : ${YELLOW}$me unset${NC} (remove current assume role if any)"
+	echo -e "Usage (2)          : ${YELLOW}$me set [OPTIONS]${NC} (create new assume role on provided arn)"
+	echo -e ""
+	echo -e "OPTIONS            "
+	echo -e "-arn               : ${YELLOW}arn${NC}"
+	echo -e "-r | --region      : ${YELLOW}AWS region${NC} (default is us-east-1)"
+	echo -e "-h                 : ${YELLOW}help${NC}"
+	echo -e ""
+	echo -e "Example            : ${YELLOW}$me set -arn=arn:aws:iam::123456789012:role/xyz${NC}"
+	echo -e "Example            : ${YELLOW}$me set -r=us-west-1 -arn=arn:aws:iam::123456789012:role/xyz${NC}"
+	echo -e "Example            : ${YELLOW}$me unset${NC}"
+	echo -e ""
+	exit
+}
 
 for ARGUMENT in "$@"
 do
@@ -8,52 +38,53 @@ do
 
     case "$KEY" in
             -arn| --role-arn) arn=${VALUE} ;;
-            -unset) unset=${VALUE} ;;
+            -r| --region) region=${VALUE} ;;
+            set) UNSET=false;SET=true ;;
+            unset) UNSET=true;SET=false ;;
             -h | --help | ?) help ;;
             *)
     esac
 done
 
 
-#if [ $1 = "unset" ]; then
-#
-#  if [[ -z "${ORIGINAL_AWS_ACCESS_KEY_ID}" ]]; then
-#    echo "ORIGINAL_AWS_ACCESS_KEY_ID does not exists"
-#    exit 1
-#  fi
-#
-#  unset AWS_ACCESS_KEY_ID
-#  unset AWS_SECRET_ACCESS_KEY
-#  unset AWS_SESSION_TOKEN
-#  unset AWS_EXPIRATION
-#
-#  export AWS_ACCESS_KEY_ID=${ORIGINAL_AWS_ACCESS_KEY_ID}
-#  export AWS_SECRET_ACCESS_KEY=${ORIGINAL_AWS_SECRET_ACCESS_KEY}
-#
-#  unset ORIGINAL_AWS_ACCESS_KEY_ID
-#  unset ORIGINAL_AWS_SECRET_ACCESS_KEY
-#  echo "-------Original------"
-#  aws s3 ls
-#fi
-
-
-ROLE_SESSION_NAME="ROLE_SESSION_NAME_"`date +%s`
-CMD="aws sts assume-role --role-arn ${arn} --role-session-name ${ROLE_SESSION_NAME} --duration-seconds 900 --output=json"
-echo $CMD
-CREDENTIALS=$(aws sts assume-role --role-arn ${arn} --role-session-name ${ROLE_SESSION_NAME} --duration-seconds 900 --output=json) # `aws sts assume-role --role-arn "${2}" --role-session-name ${ROLE_NAME} --duration-seconds 900 --output=json`
-echo $CREDENTIALS
-export ORIGINAL_AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-export ORIGINAL_AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-
-export AWS_DEFAULT_REGION=us-east-1
-export AWS_ACCESS_KEY_ID=`echo ${CREDENTIALS} | jq -r '.Credentials.AccessKeyId'`
-export AWS_SECRET_ACCESS_KEY=`echo ${CREDENTIALS} | jq -r '.Credentials.SecretAccessKey'`
-export AWS_SESSION_TOKEN=`echo ${CREDENTIALS} | jq -r '.Credentials.SessionToken'`
-export AWS_EXPIRATION=`echo ${CREDENTIALS} | jq -r '.Credentials.Expiration'`
-
-echo "-------Run as Assumed Role ------"
-aws s3 ls
-echo "Variable ORIGINAL_AWS_ACCESS_KEY_ID is saved in memory"
+if [ -z "$region" ]; then
+	region=us-east-1
+fi
 
 
 
+if [ "$UNSET" = "true" ]; then
+  echo "Removing existing assumed role if any"
+
+  unset AWS_ACCESS_KEY_ID
+  unset AWS_SECRET_ACCESS_KEY
+  unset AWS_SESSION_TOKEN
+  unset AWS_EXPIRATION
+
+  export AWS_ACCESS_KEY_ID=${ORIGINAL_AWS_ACCESS_KEY_ID}
+  export AWS_SECRET_ACCESS_KEY=${ORIGINAL_AWS_SECRET_ACCESS_KEY}
+
+  unset ORIGINAL_AWS_ACCESS_KEY_ID
+  unset ORIGINAL_AWS_SECRET_ACCESS_KEY
+  aws s3 ls
+fi
+
+
+if [ "$SET" = "true" ]; then
+  echo "Fetching assume role session"
+
+  ROLE_SESSION_NAME="ROLE_SESSION_NAME_"`date +%s`
+  CREDENTIALS=$(aws sts assume-role --role-arn ${arn} --role-session-name ${ROLE_SESSION_NAME} --duration-seconds 1800 --output=json) # `aws sts assume-role --role-arn "${2}" --role-session-name ${ROLE_NAME} --duration-seconds 900 --output=json`
+
+  export ORIGINAL_AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+  export ORIGINAL_AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+
+  export AWS_DEFAULT_REGION=${region}
+  export AWS_ACCESS_KEY_ID=`echo ${CREDENTIALS} | jq -r '.Credentials.AccessKeyId'`
+  export AWS_SECRET_ACCESS_KEY=`echo ${CREDENTIALS} | jq -r '.Credentials.SecretAccessKey'`
+  export AWS_SESSION_TOKEN=`echo ${CREDENTIALS} | jq -r '.Credentials.SessionToken'`
+  export AWS_EXPIRATION=`echo ${CREDENTIALS} | jq -r '.Credentials.Expiration'`
+
+  echo "-------Run as Assumed Role ------"
+  aws s3 ls
+fi
