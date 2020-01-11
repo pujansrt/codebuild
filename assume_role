@@ -1,5 +1,20 @@
 #!/usr/bin/env bash
 
+
+for ARGUMENT in "$@"
+do
+    KEY=$(echo $ARGUMENT | cut -f1 -d=)
+    VALUE=$(echo $ARGUMENT | cut -f2 -d=)
+
+    case "$KEY" in
+            -arn| --role-arn) arn=${VALUE} ;;
+            -unset) unset=${VALUE} ;;
+            -h | --help | ?) help ;;
+            *)
+    esac
+done
+
+
 #if [ $1 = "unset" ]; then
 #
 #  if [[ -z "${ORIGINAL_AWS_ACCESS_KEY_ID}" ]]; then
@@ -23,10 +38,10 @@
 
 
 ROLE_SESSION_NAME="ROLE_SESSION_NAME_"`date +%s`
-CMD="aws sts assume-role --role-arn \"${1}\" --role-session-name ${ROLE_SESSION_NAME} --duration-seconds 900 --output=json"
+CMD="aws sts assume-role --role-arn ${arn} --role-session-name ${ROLE_SESSION_NAME} --duration-seconds 900 --output=json"
 echo $CMD
-CREDENTIALS=$(aws sts assume-role --role-arn ${1} --role-session-name ${ROLE_SESSION_NAME} --duration-seconds 900 --output=json) # `aws sts assume-role --role-arn "${2}" --role-session-name ${ROLE_NAME} --duration-seconds 900 --output=json`
-
+CREDENTIALS=$(aws sts assume-role --role-arn ${arn} --role-session-name ${ROLE_SESSION_NAME} --duration-seconds 900 --output=json) # `aws sts assume-role --role-arn "${2}" --role-session-name ${ROLE_NAME} --duration-seconds 900 --output=json`
+echo $CREDENTIALS
 export ORIGINAL_AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
 export ORIGINAL_AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
 
