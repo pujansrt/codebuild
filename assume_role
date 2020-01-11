@@ -12,7 +12,7 @@ UNSET=false
 ORIGINAL_AWS_ACCESS_KEY_ID=""
 ORIGINAL_AWS_SECRET_ACCESS_KEY=""
 
-function help {
+help() {
 	me=`basename "$0"`
 	echo -e ""
 	echo -e "Help               : Running this script"
