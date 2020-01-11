@@ -1,10 +1,19 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-ASSUME_ROLE=$1
 
-echo ${ASSUME_ROLE}
+ASSUME_ROLE="${1}"
+ROLE_NAME="RoleSession_"`date +%s`
+CREDENTIALS=`aws sts assume-role --role-arn $ASSUME_ROLE --role-session-name $ROLE_NAME --duration-seconds 900 --output=json`
+export ORIGINAL_AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+export ORIGINAL_AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
 
-#credentials_json=$(aws sts assume-role --role-arn ${ASSUME_ROLE} --role-session-name "RoleSession1")
-#export AWS_ACCESS_KEY_ID=$(echo $credentials_json | jq -r .Credentials.AccessKeyId)
-#export AWS_SECRET_ACCESS_KEY=$(echo $credentials_json | jq -r .Credentials.SecretAccessKey)
-#export AWS_SESSION_TOKEN=$(echo $credentials_json | jq -r .Credentials.SessionToken)
+export AWS_DEFAULT_REGION=us-east-1
+export AWS_ACCESS_KEY_ID=`echo ${CREDENTIALS} | jq -r '.Credentials.AccessKeyId'`
+export AWS_SECRET_ACCESS_KEY=`echo ${CREDENTIALS} | jq -r '.Credentials.SecretAccessKey'`
+export AWS_SESSION_TOKEN=`echo ${CREDENTIALS} | jq -r '.Credentials.SessionToken'`
+export AWS_EXPIRATION=`echo ${CREDENTIALS} | jq -r '.Credentials.Expiration'`
+
+echo "-------Run as Assumed Role ------"
+aws s3 ls
+
+
