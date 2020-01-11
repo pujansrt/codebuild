@@ -1,9 +1,32 @@
 #!/usr/bin/env bash
 
+#if [ $1 = "unset" ]; then
+#
+#  if [[ -z "${ORIGINAL_AWS_ACCESS_KEY_ID}" ]]; then
+#    echo "ORIGINAL_AWS_ACCESS_KEY_ID does not exists"
+#    exit 1
+#  fi
+#
+#  unset AWS_ACCESS_KEY_ID
+#  unset AWS_SECRET_ACCESS_KEY
+#  unset AWS_SESSION_TOKEN
+#  unset AWS_EXPIRATION
+#
+#  export AWS_ACCESS_KEY_ID=${ORIGINAL_AWS_ACCESS_KEY_ID}
+#  export AWS_SECRET_ACCESS_KEY=${ORIGINAL_AWS_SECRET_ACCESS_KEY}
+#
+#  unset ORIGINAL_AWS_ACCESS_KEY_ID
+#  unset ORIGINAL_AWS_SECRET_ACCESS_KEY
+#  echo "-------Original------"
+#  aws s3 ls
+#fi
 
-ASSUME_ROLE="${1}"
-ROLE_NAME="RoleSession_"`date +%s`
-CREDENTIALS=`aws sts assume-role --role-arn $ASSUME_ROLE --role-session-name $ROLE_NAME --duration-seconds 900 --output=json`
+
+ROLE_SESSION_NAME="ROLE_SESSION_NAME_"`date +%s`
+CMD="aws sts assume-role --role-arn \"${1}\" --role-session-name ${ROLE_SESSION_NAME} --duration-seconds 900 --output=json"
+echo $CMD
+CREDENTIALS=$(aws sts assume-role --role-arn ${1} --role-session-name ${ROLE_SESSION_NAME} --duration-seconds 900 --output=json) # `aws sts assume-role --role-arn "${2}" --role-session-name ${ROLE_NAME} --duration-seconds 900 --output=json`
+
 export ORIGINAL_AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
 export ORIGINAL_AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
 
@@ -15,5 +38,7 @@ export AWS_EXPIRATION=`echo ${CREDENTIALS} | jq -r '.Credentials.Expiration'`
 
 echo "-------Run as Assumed Role ------"
 aws s3 ls
+echo "Variable ORIGINAL_AWS_ACCESS_KEY_ID is saved in memory"
+
 
 
