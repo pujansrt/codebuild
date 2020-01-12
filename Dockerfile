@@ -42,7 +42,7 @@ RUN apt-get install -y nodejs
 
 RUN wget -q https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip && unzip terraform_${TF_VERSION}_linux_amd64.zip && mv terraform /usr/local/bin/
 
-ADD assume_role.sh /usr/local/bin/assume_role
+ADD assume_role /usr/local/bin/assume_role
 
 RUN chmod +x /usr/local/bin/assume_role
 
