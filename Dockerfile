@@ -12,11 +12,13 @@ RUN apt-get update \
     && apt-get clean
 
 RUN apt-get install -y \
-		build-essential \
-		wget \
-		git \
-		curl \
-		unzip \
+	build-essential \
+	wget \
+	git \
+	curl \
+	unzip \
+	vim \
+	jq \
         python3 \
         python3-pip \
         python3-setuptools \
@@ -33,16 +35,15 @@ RUN curl -sL https://deb.nodesource.com/setup_12.x | bash
 
 RUN apt-get install -y nodejs
 
-RUN git version
-
-RUN node -v
-
-RUN npm -v
+# RUN git version
+# RUN node -v
+# RUN npm -v
+# RUN which jq
 
 RUN wget -q https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip && unzip terraform_${TF_VERSION}_linux_amd64.zip && mv terraform /usr/local/bin/
 
-ADD assume_role /usr/local/bin/
+ADD assume_role.sh /usr/local/bin/assume_role
 
 RUN chmod +x /usr/local/bin/assume_role
 
-CMD ["/bin/bash"]
+CMD ["/usr/bin/bash"]
