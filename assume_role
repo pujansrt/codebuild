@@ -51,6 +51,9 @@ if [ -z "$region" ]; then
 	region=us-east-1
 fi
 
+
+echo "assume_role version 1.0.1"
+
 if [ "$UNSET" = "true" ]; then
 #  if [[ -z "${ORIGINAL_AWS_ACCESS_KEY_ID}" ]]; then
 #    echo "ORIGINAL_AWS_ACCESS_KEY_ID does not exists"
@@ -71,7 +74,7 @@ fi
 
 
 if [ "$SET" = "true" ]; then
-  echo -e "${YELLOW}Fetching assume role session${NC}"
+  echo "${YELLOW}Fetching assume role session${NC}"
 
 #  if [[ -z "${arn}" ]]; then
 #    echo "arn is not provided"
