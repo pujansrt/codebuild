@@ -17,6 +17,7 @@ RUN apt-get install -y \
 	git \
 	curl \
 	unzip \
+	zip \
 	rsync \
 	jq \
     python3 python3-pip python3-setuptools \
